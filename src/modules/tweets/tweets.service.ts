@@ -4,6 +4,7 @@ import { Tweet } from './tweet.entity';
 import { LikesService } from 'src/modules/likes/likes.service';
 import { Like } from 'src/modules/likes/like.entity'
 import { ITweetResponse, ITweetResponse2 } from './interface';
+import { RESPONSE_MESSAGES } from 'src/core/constant';
 
 @Injectable()
 export class TweetsService {
@@ -20,7 +21,7 @@ export class TweetsService {
     });
     return {
       data: tweets,
-      message: 'Tweets retrieved successfully',
+      message: RESPONSE_MESSAGES.OK,
       statusCode: HttpStatus.OK,
     };
   }
@@ -34,14 +35,14 @@ export class TweetsService {
     if (!tweets) {
       return {
         data: null,
-        message: 'Tweet not found',
+        message: RESPONSE_MESSAGES.NOT_FOUND,
         statusCode: HttpStatus.NOT_FOUND,
       };
     }
   
     return {
       data: tweets,
-      message: 'Tweets retrieved successfully',
+      message: RESPONSE_MESSAGES.OK,
       statusCode: HttpStatus.OK,
     };
   }
@@ -57,13 +58,13 @@ export class TweetsService {
     if (!tweets) {
       return {
         data: null,
-        message: 'Tweet not found',
+        message: RESPONSE_MESSAGES.NOT_FOUND,
         statusCode: HttpStatus.NOT_FOUND,
       };
     }
     return {
       data: tweets,
-      message: 'Tweets retrieved successfully',
+      message: RESPONSE_MESSAGES.OK,
       statusCode: HttpStatus.OK,
     };
   }
@@ -86,14 +87,14 @@ export class TweetsService {
     if (affectedCount === 0) {
       return {
         data: null,
-        message: 'Tweet not found',
+        message: RESPONSE_MESSAGES.NOT_FOUND,
         statusCode: HttpStatus.NOT_FOUND,
       };
     }
 
     return {
       data: affectedRows[0],
-      message: 'Tweet updated successfully',
+      message: RESPONSE_MESSAGES.OK,
       statusCode: HttpStatus.OK,
     };
   }
@@ -111,7 +112,7 @@ export class TweetsService {
 
     // Check if the authenticated user is the author of the tweet being updated
     if (existingTweet.data.authorId !== userId) {
-      return { data: null, message: 'You are not authorized to update this tweet', statusCode: HttpStatus.UNAUTHORIZED };
+      return { data: null, message: RESPONSE_MESSAGES.UNAUTHORIZED, statusCode: HttpStatus.UNAUTHORIZED };
     }
 
     const result = await this.update(tweet.id, tweet);
@@ -122,7 +123,7 @@ export class TweetsService {
 
     return {
       data: result.data,
-      message: 'Tweet updated successfully',
+      message: RESPONSE_MESSAGES.OK,
       statusCode: HttpStatus.OK,
     };
   }
@@ -134,12 +135,12 @@ export class TweetsService {
     });
     if (affectedRowCount === 0) {
       return {
-        message: 'Tweet not found',
+        message: RESPONSE_MESSAGES.NOT_FOUND,
         statusCode: HttpStatus.NOT_FOUND,
       };
     }
     return {
-      message: 'tweet deleted successfully',
+      message: RESPONSE_MESSAGES.NO_CONTENT,
       statusCode: HttpStatus.NO_CONTENT,
     };
   }
@@ -176,13 +177,13 @@ export class TweetsService {
     })
     return{
       data:newTweetList,
-      message:'Tweet Retrieved Successfully',
+      message:RESPONSE_MESSAGES.OK,
       statusCode:HttpStatus.OK,
     };
   } catch(error) {
     return {
       data:[],
-      message: 'Error retriving Tweets',
+      message: RESPONSE_MESSAGES.ERROR,
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     };
   }
@@ -194,14 +195,14 @@ export class TweetsService {
     const tweet = await this.tweetsRepository.create({ authorId: userId, content });
     return {
       data: tweet,
-      message: 'Tweet created successfully',
+      message: RESPONSE_MESSAGES.CREATED,
       statusCode: HttpStatus.CREATED,
     };
   } catch (error) {
     console.error('Error creating tweet:', error);
     return {
       data: null,
-      message: 'An error occurred while creating a tweet',
+      message: RESPONSE_MESSAGES.ERROR,
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     };
   }

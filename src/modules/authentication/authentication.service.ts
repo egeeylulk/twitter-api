@@ -31,7 +31,7 @@ export class AuthenticationService {
     const user = await this.usersService.create(registrationDto);
     return {
       data: user.data, // Extract the user data from the response
-      message: 'User registered successfully',
+      message: RESPONSE_MESSAGES.REGISTERED,
       statusCode: HttpStatus.CREATED,
     };
   }

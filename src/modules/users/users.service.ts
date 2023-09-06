@@ -3,6 +3,7 @@ import { User } from './user.entity';
 import { TweetsService } from 'src/modules/tweets/tweets.service';
 import { Follower } from './follower.entity';
 import { IUserResponse, IUserResponse2 } from './interface';
+import { RESPONSE_MESSAGES } from 'src/core/constant';
 
 
 @Injectable()
@@ -44,13 +45,13 @@ export class UsersService {
       })
       return {
         data: newUserList,
-        message: 'Users retrieved successfull',
+        message: RESPONSE_MESSAGES.OK,
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
       return {
         data: [],
-        message: 'Error retrieving users',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
@@ -65,20 +66,20 @@ export class UsersService {
       if (user) {
         return {
           data: user,
-          message: 'User retrieved successfully',
+          message: RESPONSE_MESSAGES.OK,
           statusCode: HttpStatus.OK,
         };
       } else {
         return {
           data: null,
-          message: 'User not found',
+          message: RESPONSE_MESSAGES.NOT_FOUND,
           statusCode: HttpStatus.NOT_FOUND,
         };
       }
     } catch (error) {
       return {
         data: null,
-        message: 'Error retriving user',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
@@ -98,20 +99,20 @@ export class UsersService {
       if (user) {
         return {
           data: user,
-          message: 'User retrieved successfully',
+          message: RESPONSE_MESSAGES.OK,
           statusCode: HttpStatus.OK,
         };
       } else {
         return {
           data: null,
-          message: 'Invalid credentials',
+          message: RESPONSE_MESSAGES.UNAUTHORIZED,
           statusCode: HttpStatus.UNAUTHORIZED,
         };
       }
     } catch (error) {
       return {
         data: null,
-        message: 'Error retrieving user',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
@@ -124,13 +125,13 @@ export class UsersService {
       const newUser = await this.usersRepository.create(user);
       return {
         data: newUser,
-        message: 'User created successfully',
+        message: RESPONSE_MESSAGES.CREATED,
         statusCode: HttpStatus.CREATED,
       };
     } catch (error) {
       return {
         data: null,
-        message: 'Error creating user',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
@@ -153,7 +154,7 @@ export class UsersService {
     } catch (error) {
       return {
         data: null,
-        message: 'Error updating user',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
@@ -169,20 +170,20 @@ export class UsersService {
       if (deletedCount > 0) {
         return {
           data: deletedCount,
-          message: 'User deleted successfully',
+          message: RESPONSE_MESSAGES.OK,
           statusCode: HttpStatus.OK,
         };
       } else {
         return {
           data: 0,
-          message: 'User not found',
+          message: RESPONSE_MESSAGES.NOT_FOUND,
           statusCode: HttpStatus.NOT_FOUND,
         };
       }
     } catch (error) {
       return {
         data: 0,
-        message: 'Error deleting user',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
@@ -192,7 +193,7 @@ export class UsersService {
     if (followerId === Number(followeeId)) {
       
       return {
-        message: "You cannot follow yourself",
+        message: RESPONSE_MESSAGES.BAD_REQUEST2,
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
@@ -203,7 +204,7 @@ export class UsersService {
   
     if (existingFollower) {
       return {
-        message: "User is already following this user",
+        message: RESPONSE_MESSAGES.FOLLOW_CONFLICT,
         statusCode: HttpStatus.CONFLICT,
       };
     }
@@ -212,7 +213,7 @@ export class UsersService {
     await this.followerRepository.create({ followerId, followeeId: Number(followeeId) });
   
     return {
-      message: "User followed successfully",
+      message: RESPONSE_MESSAGES.OK,
       statusCode: HttpStatus.OK,
     };
   }
@@ -220,7 +221,7 @@ export class UsersService {
   async unfollowUser(followerId: number, followeeId: string): Promise<any> {
     if (followerId === Number(followeeId)) {
       return {
-        message: "You cannot unfollow yourself",
+        message: RESPONSE_MESSAGES.BAD_REQUEST2,
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
@@ -231,7 +232,7 @@ export class UsersService {
   
     if (!existingFollower) {
       return {
-        message: "You are not following this user",
+        message: RESPONSE_MESSAGES.NOT_FOUND,
         statusCode: HttpStatus.NOT_FOUND,
       };
     }
@@ -242,7 +243,7 @@ export class UsersService {
     });
   
     return {
-      message: 'User unfollowed successfully',
+      message: RESPONSE_MESSAGES.OK,
       statusCode: HttpStatus.OK,
     };
   }

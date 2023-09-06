@@ -2,6 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Like } from './like.entity';
 import { ILikeResponse } from './interface';
+import { RESPONSE_MESSAGES } from 'src/core/constant';
 
 @Injectable()
 export class LikesService {
@@ -18,13 +19,13 @@ export class LikesService {
       const likes = await this.likesRepository.findAll();
       return {
         data:likes,
-        message:'All likes retrieved successfully',
+        message:RESPONSE_MESSAGES.OK,
         statusCode:HttpStatus.OK,
       };
     } catch (error) {
       return {
         data:[],
-        message: 'Error retrieving likes',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
@@ -42,7 +43,7 @@ export class LikesService {
       if (existingLike) {
         return {
           data: null,
-          message: 'You have already liked this tweet',
+          message: RESPONSE_MESSAGES.BAD_REQUEST,
           statusCode: HttpStatus.BAD_REQUEST,
         };
       }
@@ -51,13 +52,13 @@ export class LikesService {
       const newLike = await this.likesRepository.create({ userId, tweetId });
       return {
         data: newLike,
-        message: 'Like created successfully',
+        message: RESPONSE_MESSAGES.CREATED,
         statusCode: HttpStatus.CREATED,
       };
     } catch (error) {
       return {
         data: null,
-        message: 'Error creating like',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
@@ -68,12 +69,12 @@ export class LikesService {
     try {
       await this.likesRepository.destroy({ where: { userId, tweetId } });
       return {
-        message: 'Like deleted successfully',
+        message: RESPONSE_MESSAGES.OK,
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
       return {
-        message: 'Error deleting like',
+        message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
