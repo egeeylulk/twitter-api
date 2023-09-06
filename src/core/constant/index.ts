@@ -1,0 +1,3 @@
+export const RESPONSE_MESSAGES = {
+    'UNAUTHORIZED': 'UNAUTHORIZED_ERROR'
+};

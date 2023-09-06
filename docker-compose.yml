@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  nestjs-app:   # Use the same service name as defined in your Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:12   
+    restart: always
+    environment:            
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=nest
+    ports:
+      - '5432:5432'
