@@ -13,6 +13,7 @@ export class TweetsService {
     private readonly tweetsRepository: typeof Tweet,
     // private readonly usersRepository: typeof User,
     private readonly likesService: LikesService,
+    
   ) {}
 
   async findAll(): Promise<ITweetResponse> {
@@ -150,7 +151,7 @@ export class TweetsService {
     message:string;
     statusCode:number;
   }> {
-    try{
+    try {
     const likesResponse = await this.likesService.findAllLikes(); 
     const likesList: Like[] = likesResponse.data; 
     const likesMap = likesList.reduce((acc,like)=> {

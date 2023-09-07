@@ -1,5 +1,7 @@
 import { Follower } from "./follower.entity";
 import { User } from "./user.entity";
+import { Like } from "../likes/like.entity";
+import { Tweet } from "../tweets/tweet.entity";
 
 export const UserProvider=[
     {
@@ -9,5 +11,13 @@ export const UserProvider=[
     {
         provide:'userRepository',
         useValue:User
+    },
+    {
+        provide:'likesRepository',
+        useValue:Like
+    },
+    {
+        provide:'tweetsRepository',
+        useValue:Tweet
     }
 ]

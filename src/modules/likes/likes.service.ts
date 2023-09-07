@@ -1,14 +1,23 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Like } from './like.entity';
 import { ILikeResponse } from './interface';
 import { RESPONSE_MESSAGES } from 'src/core/constant';
+import { Tweet } from '../tweets/tweet.entity';
+import { Follower } from '../users/follower.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class LikesService {
   constructor(
-    @InjectModel(Like)
+   // @InjectModel(Like)
+    @Inject('likesRepository')
     private readonly likesRepository: typeof Like,
+    @Inject('tweetsRepository')
+    private readonly tweetsRepository: typeof Tweet,
+    @Inject('followerRepository')
+    private readonly followerRepository: typeof Follower
+    
   ) {}
 
 
@@ -47,22 +56,50 @@ export class LikesService {
           statusCode: HttpStatus.BAD_REQUEST,
         };
       }
+      //check if the tweet is from private acoount
+      const tweet =await this.tweetsRepository.findByPk(tweetId, {
+        include:{
+          model:User,
+          as: 'author',
+        },
+      });
+      if(!tweet ) {
+        return{
+          data:null,
+          message:RESPONSE_MESSAGES.NOT_FOUND,
+          statusCode:HttpStatus.NOT_FOUND,
+        };
+      }
+      if(tweet.author.private) {
+        const isFollowing = await this.followerRepository.findOne({
+          where: {followerId:userId, followeeId:tweet.authorId},
+        });
+        if (!isFollowing) {
+          return {
+            data:null,
+            message: RESPONSE_MESSAGES.FORBIDDEN,
+            statusCode: HttpStatus.FORBIDDEN,
+          };
+        }
+      }
+
+     // If the user hasn't liked the tweet before, create the like
+     const newLike = await this.likesRepository.create({ userId, tweetId });
+     return {
+       data: newLike,
+       message: RESPONSE_MESSAGES.CREATED,
+       statusCode: HttpStatus.CREATED,
+             };
+   } catch (error) {
+           return {
+           data: null,
+           message: RESPONSE_MESSAGES.ERROR,
+           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+         };
+      }
+   }
   
-      // If the user hasn't liked the tweet before, create the like
-      const newLike = await this.likesRepository.create({ userId, tweetId });
-      return {
-        data: newLike,
-        message: RESPONSE_MESSAGES.CREATED,
-        statusCode: HttpStatus.CREATED,
-      };
-    } catch (error) {
-      return {
-        data: null,
-        message: RESPONSE_MESSAGES.ERROR,
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
-  }
+      
   
 
   async deleteLike(userId: number, tweetId: number): Promise<any> {

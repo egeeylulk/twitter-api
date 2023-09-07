@@ -3,7 +3,7 @@ import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface,
 @ValidatorConstraint({name:'isStrongPassword',async:false})
 export class IsStrongPasswordConstraint implements ValidatorConstraintInterface{
     validate(password: string, _args: ValidationArguments){
-        const strongPasswordRegex=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+        const strongPasswordRegex=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]+$/;
         return strongPasswordRegex.test(password);
     }
     defaultMessage(_args: ValidationArguments): string {
