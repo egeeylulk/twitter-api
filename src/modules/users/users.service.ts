@@ -85,6 +85,17 @@ export class UsersService {
     }
   }
 
+  async findOneById(userId: number): Promise<User | null> {
+    try {
+      const user = await this.usersRepository.findByPk(userId);
+      return user;
+    } catch (error) {
+      // Handle errors
+      throw new Error('Error finding user by ID');
+    }
+  }
+  
+
   async findOneByUsernameAndPassword(
     username: string,
     password: string,
@@ -304,6 +315,19 @@ export class UsersService {
       },
     });
   }
+
+  async findFollowRequestsForUser(userId: number): Promise<Follower[]> {
+    try {
+      const followRequests = await this.followerRepository.findAll({
+        where: { followeeId: userId, status: 'requested' }, // Assuming 'requested' is the status for follow requests
+      });
+      return followRequests;
+    } catch (error) {
+      // Handle errors
+      throw new Error('Error finding follow requests');
+    }
+  }
+  
 }
 
   

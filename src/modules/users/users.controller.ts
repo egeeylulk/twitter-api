@@ -11,19 +11,26 @@ import {
   HttpStatus,
   Post,
   Request,
-  Req
+  Req,
+  Inject,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { JwtAuthGuard } from 'src/modules/authentication/guard/jwt-auth.guard';
-import { CurrentUser } from 'src/current-user.decorator';
 import { Follower } from './follower.entity';
+import { CurrentUser } from 'src/current-user.decorator';
 
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService,
+    @Inject('followerRepository')
+    private readonly followerRepository: typeof Follower
     ) {}
+
+
+
 
   @Get(':username/followers')
   async listOfFollowers(@Param('username') username: string): Promise<any> {
@@ -40,6 +47,21 @@ export class UsersController {
     statusCode: HttpStatus.OK,
   };
 }
+
+@Get('follow-requests')
+@UseGuards(JwtAuthGuard)
+async findFollowRequestsForUser(@CurrentUser() user): Promise<Follower[]> {
+  try {
+    const userId = user.userId;
+    console.log('User ID:', userId); // Log the user ID
+    const followRequests = await this.usersService.findFollowRequestsForUser(userId);
+    return followRequests;
+  } catch (error) {
+    console.error('Error in findFollowRequestsForUser:', error);
+    throw new InternalServerErrorException('An error occurred while fetching follow requests');
+  }
+}
+
 
 // Get one user
 @Get(':username')
@@ -66,6 +88,8 @@ async findOne(@Param('username') username: string): Promise<{
   }
 
   
+
+  
   //update users name
   @Put(':username')
   async update(
@@ -83,9 +107,13 @@ async findOne(@Param('username') username: string): Promise<{
     return user;
   }
 
+  
+
+
+
   // Delete user
   @Delete(':username')
-  async delete(@Param('useername') username: string): Promise<{
+  async delete(@Param('username') username: string): Promise<{
     data: number;
     message: string;
     statusCode: number;
@@ -224,7 +252,6 @@ async findOne(@Param('username') username: string): Promise<{
   }
 
   
-
 
 }
 
