@@ -29,6 +29,20 @@ export class UsersController {
     private readonly followerRepository: typeof Follower
     ) {}
 
+    @Get('follow-requests')
+    @UseGuards(JwtAuthGuard)
+    async findFollowRequestsForUser(@CurrentUser() user): Promise<Follower[]> {
+      try {
+        const userId = user.userId;
+        console.log('User ID:', userId); // Log the user ID
+        const followRequests = await this.usersService.findFollowRequestsForUser(userId);
+        return followRequests;
+      } catch (error) {
+        console.error('Error in findFollowRequestsForUser:', error);
+        throw new InternalServerErrorException('An error occurred while fetching follow requests');
+      }
+    }
+
 
 
 
@@ -36,6 +50,7 @@ export class UsersController {
   async listOfFollowers(@Param('username') username: string): Promise<any> {
   const user = await this.usersService.findOne(username);
   if (!user) {
+    console.log('buradayız')
     throw new NotFoundException('User not found');
   }
 
@@ -48,19 +63,7 @@ export class UsersController {
   };
 }
 
-@Get('follow-requests')
-@UseGuards(JwtAuthGuard)
-async findFollowRequestsForUser(@CurrentUser() user): Promise<Follower[]> {
-  try {
-    const userId = user.userId;
-    console.log('User ID:', userId); // Log the user ID
-    const followRequests = await this.usersService.findFollowRequestsForUser(userId);
-    return followRequests;
-  } catch (error) {
-    console.error('Error in findFollowRequestsForUser:', error);
-    throw new InternalServerErrorException('An error occurred while fetching follow requests');
-  }
-}
+
 
 
 // Get one user
@@ -72,6 +75,7 @@ async findOne(@Param('username') username: string): Promise<{
 }> {
   const user = await this.usersService.findOne(username);
   if (!user) {
+    console.log('yo')
     throw new NotFoundException('User not found');
   }
   return user;
@@ -250,6 +254,8 @@ async findOne(@Param('username') username: string): Promise<{
       };
     }
   }
+
+ 
 
   
 
