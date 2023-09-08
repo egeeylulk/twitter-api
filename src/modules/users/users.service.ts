@@ -4,6 +4,7 @@ import { TweetsService } from 'src/modules/tweets/tweets.service';
 import { Follower } from './follower.entity';
 import { IUserResponse, IUserResponse2 } from './interface';
 import { RESPONSE_MESSAGES } from 'src/core/constant';
+import { MyLogger } from '../logger/logger.service';
 
 
 @Injectable()
@@ -14,11 +15,13 @@ export class UsersService {
     private readonly usersRepository: typeof User, // Sequelize Model
     private readonly tweetService: TweetsService, // Sequelize Model
     @Inject('followerRepository')
-    private readonly followerRepository: typeof Follower
+    private readonly followerRepository: typeof Follower,
+    private readonly logger:MyLogger
   ) {}
 
   async findAll(): Promise<IUserResponse> {
     try {
+      this.logger.info('findAll method called', 'UsersService', 'users.service.ts');
       const tweetList = await this.tweetService.tweetFindAll()
       const tweetMap = tweetList.reduce((ac , tweet) => {
         const key = tweet.authorId;
@@ -36,7 +39,7 @@ export class UsersService {
       const newUserList = users.map(user => {
        user=user.toJSON();
         const tweets = tweetMap[user.id]
-      console.log('user :' , user.id , 'tweets: ', tweets);
+        this.logger.info(`User: ${user.id}, Tweets: ${JSON.stringify(tweets)}`, 'UsersService', 'users.service.ts');
 
         return {
           ...user,
@@ -49,11 +52,13 @@ export class UsersService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
+      this.logger.error('An error occurred in findAll method', 'UsersService','users.service.ts'); 
       return {
         data: [],
         message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
+     
     }
   }
 
@@ -61,6 +66,8 @@ export class UsersService {
     username: string,
   ): Promise<IUserResponse> {
     try {
+      this.logger.info(`findOne method called for username: ${username}`, 'UsersService', 'users.service.ts');
+
       const user = await this.usersRepository.findOne({ where: { username } });
 
       if (user) {
@@ -87,9 +94,12 @@ export class UsersService {
 
   async findOneById(userId: number): Promise<User | null> {
     try {
+      this.logger.info(`findOneById method called for userId: ${userId}`, 'UsersService', 'users.service.ts');
+
       const user = await this.usersRepository.findByPk(userId);
       return user;
     } catch (error) {
+      this.logger.error('An error occurred in findOneById method', 'UsersService','users.service.ts');
       // Handle errors
       throw new Error('Error finding user by ID');
     }
@@ -101,6 +111,7 @@ export class UsersService {
     password: string,
   ): Promise<IUserResponse2> {
     try {
+      this.logger.info('findOneByUsernamePassword method called','UsersSeervice','users.service.ts');
       const user = await this.usersRepository.findOne({
         where: {
           username,
@@ -121,6 +132,7 @@ export class UsersService {
         };
       }
     } catch (error) {
+      this.logger.error('An error occured in findOneByUsernamePassword','UsersService','users.service.ts');
       return {
         data: null,
         message: RESPONSE_MESSAGES.ERROR,
@@ -133,6 +145,7 @@ export class UsersService {
     user: Partial<User>,
   ): Promise<IUserResponse2> {
     try {
+      this.logger.info('create method called','UsersService','users.service.ts');
       const newUser = await this.usersRepository.create(user);
       return {
         data: newUser,
@@ -140,6 +153,7 @@ export class UsersService {
         statusCode: HttpStatus.CREATED,
       };
     } catch (error) {
+      this.logger.error('An error occured','UsersService','users.service.ts');
       return {
         data: null,
         message: RESPONSE_MESSAGES.ERROR,
@@ -266,7 +280,7 @@ export class UsersService {
       });
       return followers;
     } catch (error) {
-      console.error('Error in listOfFollowers service:', error);
+      this.logger.error('Error in listOfFollowers service:', 'UsersService','users.service.ts');
       return [];
     }
   }
