@@ -172,7 +172,7 @@ export class TweetsService {
     const newTweetList= tweets.map(tweet => {
       tweet=tweet.toJSON();
       const likes = likesMap[tweet.id];
-      console.log('tweet :' , tweet.id , 'likes: ', likes);
+      this.logger.info(`tweet : ${tweet.id}, likes:  ${likes}`,'TweetsService','tweets.service.ts');
 
       return{
         ...tweet,
