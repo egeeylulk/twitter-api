@@ -6,6 +6,7 @@ import { RESPONSE_MESSAGES } from 'src/core/constant';
 import { Tweet } from '../tweets/tweet.entity';
 import { Follower } from '../users/follower.entity';
 import { User } from '../users/user.entity';
+import { MyLogger } from '../logger/logger.service';
 
 @Injectable()
 export class LikesService {
@@ -16,7 +17,8 @@ export class LikesService {
     @Inject('tweetsRepository')
     private readonly tweetsRepository: typeof Tweet,
     @Inject('followerRepository')
-    private readonly followerRepository: typeof Follower
+    private readonly followerRepository: typeof Follower,
+    private readonly logger:MyLogger
     
   ) {}
 
@@ -25,6 +27,7 @@ export class LikesService {
     ILikeResponse
 > {
     try {
+      this.logger.info('findAllLikes method called','LikesService','likes.service.ts');
       const likes = await this.likesRepository.findAll();
       return {
         data:likes,
@@ -32,6 +35,7 @@ export class LikesService {
         statusCode:HttpStatus.OK,
       };
     } catch (error) {
+      this.logger.error('An error occured in findAllLikes','LikesService','likes.service.ts');
       return {
         data:[],
         message: RESPONSE_MESSAGES.ERROR,
@@ -44,6 +48,7 @@ export class LikesService {
   
   async createLike(userId: number, tweetId: number): Promise<any> {
     try {
+      this.logger.info('createLike method called','LikesService','likes.service.ts');
       // Check if the user has already liked the tweet
       const existingLike = await this.likesRepository.findOne({
         where: { userId, tweetId },
@@ -91,6 +96,7 @@ export class LikesService {
        statusCode: HttpStatus.CREATED,
              };
    } catch (error) {
+    this.logger.error('an error occured in createLike method','LikesService','likes.service.ts')
            return {
            data: null,
            message: RESPONSE_MESSAGES.ERROR,
@@ -104,12 +110,14 @@ export class LikesService {
 
   async deleteLike(userId: number, tweetId: number): Promise<any> {
     try {
+      this.logger.info('deleteLike meethod called','LikesService','likes.service.ts')
       await this.likesRepository.destroy({ where: { userId, tweetId } });
       return {
         message: RESPONSE_MESSAGES.OK,
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
+      this.logger.error('An error occured in deleteLike method','LikesService','likes.service.ts')
       return {
         message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
