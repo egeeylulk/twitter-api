@@ -20,13 +20,15 @@ import { User } from './user.entity';
 import { JwtAuthGuard } from 'src/modules/authentication/guard/jwt-auth.guard';
 import { Follower } from './follower.entity';
 import { CurrentUser } from 'src/current-user.decorator';
+import { MyLogger } from '../logger/logger.service';
 
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService,
     @Inject('followerRepository')
-    private readonly followerRepository: typeof Follower
+    private readonly followerRepository: typeof Follower,
+    private readonly logger:MyLogger
     ) {}
 
     @Get('follow-requests')
@@ -34,11 +36,11 @@ export class UsersController {
     async findFollowRequestsForUser(@CurrentUser() user): Promise<Follower[]> {
       try {
         const userId = user.userId;
-        console.log('User ID:', userId); // Log the user ID
+        this.logger.info(`User: ${userId}`,'UsersController','users.controller.ts'); // Log the user ID
         const followRequests = await this.usersService.findFollowRequestsForUser(userId);
         return followRequests;
       } catch (error) {
-        console.error('Error in findFollowRequestsForUser:', error);
+        this.logger.error('Error in findFollowRequestsForUser:','UsersController','users.controller.ts');
         throw new InternalServerErrorException('An error occurred while fetching follow requests');
       }
     }
@@ -50,7 +52,7 @@ export class UsersController {
   async listOfFollowers(@Param('username') username: string): Promise<any> {
   const user = await this.usersService.findOne(username);
   if (!user) {
-    console.log('buradayız')
+    this.logger.info('buradayız','UsersController','users.controller.ts');
     throw new NotFoundException('User not found');
   }
 
@@ -75,7 +77,6 @@ async findOne(@Param('username') username: string): Promise<{
 }> {
   const user = await this.usersService.findOne(username);
   if (!user) {
-    console.log('yo')
     throw new NotFoundException('User not found');
   }
   return user;
@@ -254,11 +255,6 @@ async findOne(@Param('username') username: string): Promise<{
       };
     }
   }
-
- 
-
-  
-
 }
 
   

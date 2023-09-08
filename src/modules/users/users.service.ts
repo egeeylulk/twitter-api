@@ -189,6 +189,7 @@ export class UsersService {
     username: string,
   ): Promise<{ data: number; message: string; statusCode: number }> {
     try {
+      this.logger.info('delete method called','UsersService','users.service.ts');
       const deletedCount = await this.usersRepository.destroy({
         where: { username },
       });
@@ -206,6 +207,7 @@ export class UsersService {
         };
       }
     } catch (error) {
+      this.logger.error('An error occured in delete method','UsersService','users.service.ts');
       return {
         data: 0,
         message: RESPONSE_MESSAGES.ERROR,
@@ -275,6 +277,7 @@ export class UsersService {
 
   async listOfFollowers(userId: number): Promise<any[]> {
     try {
+      this.logger.info('listOfFollowers method called','UsersService','users.service.ts');
       const followers = await this.followerRepository.findAll({
         where: { followeeId: userId },
       });
@@ -332,11 +335,13 @@ export class UsersService {
 
   async findFollowRequestsForUser(userId: number): Promise<Follower[]> {
     try {
+      this.logger.info('findFollowRequestsForUser','UsersService','users.service.ts');
       const followRequests = await this.followerRepository.findAll({
         where: { followeeId: userId, status: 'requested' }, // Assuming 'requested' is the status for follow requests
       });
       return followRequests;
     } catch (error) {
+      this.logger.error('An error occured in findFollowRequestsForUser method','UsersService','users.service.ts');
       // Handle errors
       throw new Error('Error finding follow requests');
     }
