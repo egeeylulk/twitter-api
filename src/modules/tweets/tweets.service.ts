@@ -5,6 +5,7 @@ import { LikesService } from 'src/modules/likes/likes.service';
 import { Like } from 'src/modules/likes/like.entity'
 import { ITweetResponse, ITweetResponse2 } from './interface';
 import { RESPONSE_MESSAGES } from 'src/core/constant';
+import { MyLogger } from '../logger/logger.service';
 
 @Injectable()
 export class TweetsService {
@@ -13,6 +14,7 @@ export class TweetsService {
     private readonly tweetsRepository: typeof Tweet,
     // private readonly usersRepository: typeof User,
     private readonly likesService: LikesService,
+    private readonly logger:MyLogger
     
   ) {}
 
@@ -152,6 +154,7 @@ export class TweetsService {
     statusCode:number;
   }> {
     try {
+      this.logger.info('findAllTweetsWithLikes method called','TweetsService','tweets.service.file');
     const likesResponse = await this.likesService.findAllLikes(); 
     const likesList: Like[] = likesResponse.data; 
     const likesMap = likesList.reduce((acc,like)=> {
@@ -182,6 +185,7 @@ export class TweetsService {
       statusCode:HttpStatus.OK,
     };
   } catch(error) {
+    this.logger.error('An error occured in findAllTweetsWithLikes','TweetsService','tweets.service.ts');
     return {
       data:[],
       message: RESPONSE_MESSAGES.ERROR,
@@ -200,7 +204,7 @@ export class TweetsService {
       statusCode: HttpStatus.CREATED,
     };
   } catch (error) {
-    console.error('Error creating tweet:', error);
+    this.logger.error('Error creating tweet:','TweetsService','tweets.service.ts');
     return {
       data: null,
       message: RESPONSE_MESSAGES.ERROR,
