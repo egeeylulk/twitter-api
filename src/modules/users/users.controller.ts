@@ -11,7 +11,6 @@ import {
   HttpStatus,
   Post,
   Request,
-  Req,
   Inject,
   InternalServerErrorException
 } from '@nestjs/common';

@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, HasMany, BelongsToMany, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, HasMany,} from 'sequelize-typescript';
 import { Like } from 'src/modules/likes/like.entity';
 import { Tweet } from 'src/modules/tweets/tweet.entity';
 

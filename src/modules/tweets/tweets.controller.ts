@@ -7,7 +7,6 @@ import {
   Delete,
   Put,
   UseGuards,
-  HttpStatus,
 } from '@nestjs/common';
 import { TweetsService } from './tweets.service';
 import { Tweet } from './tweet.entity';
