@@ -212,7 +212,4 @@ export class TweetsService {
     };
   }
 }
-
-
-  
 }
