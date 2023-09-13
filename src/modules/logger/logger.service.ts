@@ -1,4 +1,5 @@
 import { LoggerService } from "@nestjs/common";
+import { DATE } from "sequelize";
 
 export class MyLogger implements LoggerService{
     
@@ -8,7 +9,9 @@ export class MyLogger implements LoggerService{
       }
 
       log(message: string, context?: string) {
+        const date = new Date();
         const logObject = {
+          date,
           message,
           context,
         };
@@ -16,7 +19,9 @@ export class MyLogger implements LoggerService{
       }
 
     info(message: string, className:string,fileName:string) {
+        const date = new Date();
         const infoObject = {
+            date,
             message,
             className,
             fileName,
@@ -26,7 +31,9 @@ export class MyLogger implements LoggerService{
   
     
     error(message: string,className:string,fileName:string ) {
+        const date = new Date();
         const errorObject = {
+            date,
             message,
             className,
             fileName,
@@ -36,7 +43,9 @@ export class MyLogger implements LoggerService{
   
     
     warn(message: string,className:string,fileName:string) {
+        const date = new Date();
         const warnObject = {
+            date,
             message,
             className,
             fileName,
@@ -46,7 +55,9 @@ export class MyLogger implements LoggerService{
   
     
     debug?(message: string,className:string,fileName:string) {
+        const date= new Date();
         const debugObject = {
+            date,
             message,
             className,
             fileName,
@@ -56,7 +67,9 @@ export class MyLogger implements LoggerService{
   
    
     verbose?(message: string, className:string,fileName:string ) {
+        const date = new Date();
         const verboseObject ={
+            date,
             message,
             className,
             fileName,

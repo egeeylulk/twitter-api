@@ -5,6 +5,8 @@ import { Follower } from './follower.entity';
 import { IUserResponse, IUserResponse2 } from './interface';
 import { RESPONSE_MESSAGES } from 'src/core/constant';
 import { MyLogger } from '../logger/logger.service';
+import { RedisService } from 'nestjs-redis';
+import { RedisCacheService } from '../redis/redis-cache.service';
 
 
 @Injectable()
@@ -16,49 +18,81 @@ export class UsersService {
     private readonly tweetService: TweetsService, // Sequelize Model
     @Inject('followerRepository')
     private readonly followerRepository: typeof Follower,
-    private readonly logger:MyLogger
+    private readonly logger:MyLogger,
+    private readonly redisCacheService: RedisCacheService
+
   ) {}
 
+
+  async getCachedData(key: string): Promise<any | null> {
+    const cachedData = await this.redisCacheService.get(key);
+    return cachedData;
+  }
+
+  async cacheData(key: string, data: any, ttl: number = 3600): Promise<void> {
+    await this.redisCacheService.set(key, data, ttl);
+  }
+  
+
   async findAll(): Promise<IUserResponse> {
+    const cacheKey = 'userList'; // Define a unique cache key
+
     try {
       this.logger.info('findAll method called', 'UsersService', 'users.service.ts');
-      const tweetList = await this.tweetService.tweetFindAll()
-      const tweetMap = tweetList.reduce((ac , tweet) => {
-        const key = tweet.authorId;
-        
 
-        if(!ac[key] ) {
+      // Attempt to get data from Redis cache
+      const cachedData = await this.redisCacheService.get(cacheKey);
+
+      if (cachedData) {
+        // If cached data exists, return it
+        this.logger.info('Data retrieved from cache', 'UsersService', 'users.service.ts');
+        return {
+          data: cachedData,
+          message: RESPONSE_MESSAGES.OK,
+          statusCode: HttpStatus.OK,
+        };
+      }
+      this.logger.info('Data retrieved from database', 'UsersService', 'users.service.ts')
+
+      // If data is not in cache, retrieve it from the database
+      const tweetList = await this.tweetService.tweetFindAll();
+      const tweetMap = tweetList.reduce((ac, tweet) => {
+        const key = tweet.authorId;
+
+        if (!ac[key]) {
           ac[key] = [];
-         
         }
-        ac[key].push( tweet.toJSON());
-        
+        ac[key].push(tweet.toJSON());
+
         return ac;
-      }, {})
+      }, {});
       const users = await this.usersRepository.findAll();
-      const newUserList = users.map(user => {
-       user=user.toJSON();
-        const tweets = tweetMap[user.id]
+      const newUserList = users.map((user) => {
+        user = user.toJSON();
+        const tweets = tweetMap[user.id];
         this.logger.info(`User: ${user.id}, Tweets: ${JSON.stringify(tweets)}`, 'UsersService', 'users.service.ts');
 
         return {
           ...user,
           tweetList: tweets,
-        }
-      })
+        };
+      });
+
+      // Cache the data in Redis for future use
+      await this.redisCacheService.set(cacheKey, newUserList, 3600); // Cache for 1 hour (3600 seconds)
+
       return {
         data: newUserList,
         message: RESPONSE_MESSAGES.OK,
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      this.logger.error('An error occurred in findAll method', 'UsersService','users.service.ts'); 
+      this.logger.error('An error occurred in findAll method', 'UsersService', 'users.service.ts');
       return {
         data: [],
         message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
-     
     }
   }
 

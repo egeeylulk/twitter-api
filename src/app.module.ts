@@ -22,7 +22,7 @@ import { Follower } from './modules/users/follower.entity';
   imports: [
     ConfigModule.forRoot(),
     SequelizeModule.forRootAsync({
-      imports: [ConfigModule, DatabaseModule],
+      imports: [ConfigModule, DatabaseModule,],
       useFactory: async (databaseService: DatabaseService) => {
         const sequelizeOptions = await databaseService.getSequelizeOptions();
         return {

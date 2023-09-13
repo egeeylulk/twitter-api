@@ -30,6 +30,16 @@ export class UsersController {
     private readonly logger:MyLogger
     ) {}
 
+    // Get all users
+  @Get('findAll')
+  async findAll(): Promise<{
+    data: User[];
+    message: string;
+    statusCode: number;
+  }> {
+    return await this.usersService.findAll();
+  }
+
     @Get('follow-requests')
     @UseGuards(JwtAuthGuard)
     async findFollowRequestsForUser(@CurrentUser() user): Promise<Follower[]> {
@@ -81,15 +91,7 @@ async findOne(@Param('username') username: string): Promise<{
   return user;
 }
 
-  // Get all users
-  @Get('findAll')
-  async findAll(): Promise<{
-    data: User[];
-    message: string;
-    statusCode: number;
-  }> {
-    return await this.usersService.findAll();
-  }
+  
 
   
 
