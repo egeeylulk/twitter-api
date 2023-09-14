@@ -14,4 +14,17 @@ export class RedisCacheService {
     const data = await this.redisClient.get(key);
     return data ? JSON.parse(data) : null;
   }
+
+  async getCachedData(key: string): Promise<any | null> {
+    const cachedData = await this.redisClient.get(key);
+    if (cachedData) {
+      return JSON.parse(cachedData); // Assuming your data is stored as JSON
+    }
+    return null;
+  }
+
+  async cacheData(key: string, data: any, ttl: number = 3600): Promise<void> {
+    await this.redisClient.set(key, JSON.stringify(data), 'EX', ttl);
+  }
 }
+

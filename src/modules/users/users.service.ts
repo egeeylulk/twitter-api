@@ -145,7 +145,7 @@ export class UsersService {
     password: string,
   ): Promise<IUserResponse2> {
     try {
-      this.logger.info('findOneByUsernamePassword method called','UsersSeervice','users.service.ts');
+      this.logger.info('findOneByUsernamePassword method called','UsersService','users.service.ts');
       const user = await this.usersRepository.findOne({
         where: {
           username,

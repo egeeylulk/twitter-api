@@ -6,6 +6,7 @@ import { Like } from 'src/modules/likes/like.entity'
 import { ITweetResponse, ITweetResponse2 } from './interface';
 import { RESPONSE_MESSAGES } from 'src/core/constant';
 import { MyLogger } from '../logger/logger.service';
+import { RedisCacheService } from '../redis/redis-cache.service';
 
 @Injectable()
 export class TweetsService {
@@ -14,9 +15,20 @@ export class TweetsService {
     private readonly tweetsRepository: typeof Tweet,
     // private readonly usersRepository: typeof User,
     private readonly likesService: LikesService,
-    private readonly logger:MyLogger
+    private readonly logger:MyLogger,
+    private readonly redisCacheService: RedisCacheService,
+
     
   ) {}
+
+  async getCachedData(key: string): Promise<any | null> {
+    const cachedData = await this.redisCacheService.get(key);
+    return cachedData;
+  }
+
+  async cacheData(key: string, data: any, ttl: number = 3600): Promise<void> {
+    await this.redisCacheService.set(key, data, ttl);
+  }
 
   async findAll(): Promise<ITweetResponse> {
     const tweets = await this.tweetsRepository.findAll({
@@ -29,8 +41,25 @@ export class TweetsService {
     };
   }
   async tweetFindAll(): Promise<Tweet[]> {
-   return this.tweetsRepository.findAll();
+    const cacheKey = 'tweetsList';
+    const cachedData = await this.redisCacheService.getCachedData(cacheKey); // Use the getCachedData method from RedisService
+  
+    if (cachedData) {
+      this.logger.info('Data came from cache', 'TweetsService', 'tweets.service.ts');
+      return cachedData;
+    }
+  
+    this.logger.info('Data came from database', 'TweetsService', 'tweets.service.ts');
+  
+    // Fetch tweets from the database and await the result
+    const tweets = await this.tweetsRepository.findAll();
+  
+    // Cache the fetched data for future use
+    await this.redisCacheService.cacheData(cacheKey, tweets, /* Set your desired TTL */);
+  
+    return tweets;
   }
+  
   async findOne(id: number): Promise<ITweetResponse2> {
     const tweets = await this.tweetsRepository.findByPk(id, {
       include: [{ association: 'author', attributes: ['id', 'name', 'email'] }],
