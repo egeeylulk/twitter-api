@@ -7,6 +7,7 @@ import { Tweet } from '../tweets/tweet.entity';
 import { Follower } from '../users/follower.entity';
 import { User } from '../users/user.entity';
 import { MyLogger } from '../logger/logger.service';
+import { RedisCacheService } from '../redis/redis-cache.service';
 
 @Injectable()
 export class LikesService {
@@ -18,31 +19,48 @@ export class LikesService {
     private readonly tweetsRepository: typeof Tweet,
     @Inject('followerRepository')
     private readonly followerRepository: typeof Follower,
-    private readonly logger:MyLogger
+    private readonly logger:MyLogger,
+    private readonly redisCacheService: RedisCacheService,
     
   ) {}
 
 
-  async findAllLikes():Promise<
-    ILikeResponse
-> {
+  async findAllLikes(): Promise<ILikeResponse> {
+    const cacheKey = 'likeList';
     try {
-      this.logger.info('findAllLikes method called','LikesService','likes.service.ts');
+      this.logger.info('findAllLikes method called', 'LikesService', 'likes.service.ts');
+      const cachedData = await this.redisCacheService.get(cacheKey);
+      
+      if (cachedData) {
+        this.logger.info('Likes data came from cache', 'LikesService', 'likes.service.ts');
+        return {
+          data: cachedData,  // Return the cached data
+          message: RESPONSE_MESSAGES.OK,
+          statusCode: HttpStatus.OK,
+        };
+      }
+      this.logger.info('data came from database','LikesService','likes.service.ts');
+  
       const likes = await this.likesRepository.findAll();
+  
+      // Cache the likes data for future use
+      await this.redisCacheService.cacheData(cacheKey, likes, /* Set your desired TTL */);
+  
       return {
-        data:likes,
-        message:RESPONSE_MESSAGES.OK,
-        statusCode:HttpStatus.OK,
+        data: likes,
+        message: RESPONSE_MESSAGES.OK,
+        statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      this.logger.error('An error occured in findAllLikes','LikesService','likes.service.ts');
+      this.logger.error('An error occurred in findAllLikes', 'LikesService', 'likes.service.ts');
       return {
-        data:[],
+        data: [],
         message: RESPONSE_MESSAGES.ERROR,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
   }
+  
 
 
   

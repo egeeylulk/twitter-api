@@ -5,9 +5,10 @@ import { Like } from './like.entity'; // Make sure to provide the correct path
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UserProvider } from '../users/user.provider';
 import { MyLogger } from '../logger/logger.service';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Like])], // Import the Like model
+  imports: [SequelizeModule.forFeature([Like]),RedisModule], // Import the Like model
   controllers: [LikesController],
   providers: [LikesService,...UserProvider,MyLogger],
   exports: [LikesService]
